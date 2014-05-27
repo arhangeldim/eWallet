@@ -1,0 +1,568 @@
+package arhangel.dim.fm;
+
+import java.util.Set;
+
+/**
+ *
+ */
+public interface DataStore {
+
+	User getUser(String name);
+
+	Set<String> getUserNames();
+
+	Set<Account> getAccounts(User owner);
+
+	Set<Record> getRecords(Account account);
+
+	void addUser(User user);
+
+	void addAccount(User user, Account account);
+
+	void addRecord(Account account, Record record);
+}
+
+package arhangel.dim.fm;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ *
+ */
+public class MemoryDataStore implements DataStore {
+
+	private Map<String, User> users = new HashMap<>();
+	private Map<User, Set<Account>> accounts = new HashMap<>();
+    private Map<Account, Set<Record>> records = new HashMap<>();
+
+	@Override
+	public User getUser(String name) {
+		return users.get(name);
+	}
+
+	@Override
+	public Set<String> getUserNames() {
+		return users.keySet();
+	}
+
+	@Override
+	public Set<Account> getAccounts(User owner) {
+        if (accounts.containsKey(owner)) {
+            return accounts.get(owner);
+        } else {
+            return new HashSet<>();
+        }
+	}
+
+	@Override
+	public Set<Record> getRecords(Account account) {
+        if (records.containsKey(account)) {
+            return records.get(account);
+        } else {
+            return new HashSet<>();
+        }
+	}
+
+	@Override
+	public void addUser(User user) {
+		users.put(user.getName(), user);
+	}
+
+	@Override
+	public void addAccount(User user, Account account) {
+		Set<Account> userAccounts;
+		if (!accounts.containsKey(user)) {
+			userAccounts = new HashSet<>();
+			userAccounts.add(account);
+			accounts.put(user, userAccounts);
+		} else {
+			userAccounts = accounts.get(user);
+			userAccounts.add(account);
+		}
+	}
+
+	@Override
+	public void addRecord(Account account, Record record) {
+        Set<Record> accountRecords;
+        if (!records.containsKey(account)) {
+            accountRecords = new HashSet<>();
+            records.put(account, accountRecords);
+        } else {
+            accountRecords = records.get(account);
+        }
+        accountRecords.add(record);
+
+	}
+
+}
+
+
+package arhangel.dim.fm;
+
+import java.util.List;
+
+/**
+ *
+ */
+public class User {
+    private String name;
+    private char[] passHash;
+
+    public User(String name, char[] passHash) {
+        this.name = name;
+        this.passHash = passHash;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public char[] getPassHash() {
+        return passHash;
+    }
+
+    public void setPassHash(char[] passHash) {
+        this.passHash = passHash;
+    }
+
+    @Override
+    public String toString() {
+        return "User: [" + name + ", " + passHash + "];";
+    }
+
+}
+
+
+package arhangel.dim.fm;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+/**
+ *
+ */
+public class Account {
+	private int id;
+	private String description;
+	private BigDecimal amount;
+
+	public Account() {
+		amount = new BigDecimal(0);
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public BigDecimal getAmount() {
+		return amount;
+	}
+
+	public int getId() {
+		return id;
+	}
+
+	public void setId(int id) {
+		this.id = id;
+	}
+
+    @Override
+    public String toString() {
+        return "Account: [" + description + "]";
+    }
+}
+
+
+package arhangel.dim.fm;
+
+import java.math.BigDecimal;
+import java.util.Date;
+
+/**
+ *
+ */
+public class Record {
+    private String description;
+    private BigDecimal sum;
+    private Date date;
+    private boolean isPut;
+
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public BigDecimal getSum() {
+        return sum;
+    }
+
+    public void setSum(BigDecimal sum) {
+        this.sum = sum;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public boolean isPut() {
+        return isPut;
+    }
+
+    public void setPut(boolean put) {
+        isPut = put;
+    }
+}
+
+
+package arhangel.dim.fm;
+
+import java.util.Arrays;
+import java.util.Set;
+
+/**
+ *
+ */
+public class Controller {
+
+	private DataStore dataStore;
+	private User currentUser;
+
+	public Controller() {
+		dataStore = new MemoryDataStore();
+	}
+
+	private boolean isUserRegistered(String userName) {
+		return dataStore.getUser(userName) != null;
+	}
+
+	public User getCurrentUser() {
+		return currentUser;
+	}
+
+	public void setCurrentUser(User currentUser) {
+		this.currentUser = currentUser;
+	}
+
+	public User login(String name, char[] pass) {
+		if (isUserRegistered(name)) {
+			User user = getUserByName(name);
+			if (isPasswordCorrect(user, pass)) {
+				return user;
+			}
+		}
+		return null;
+	}
+
+	public void addAccount(User owner, Account account) {
+		dataStore.addAccount(owner, account);
+	}
+
+	public Set<Account> getAccounts(User owner) {
+		return dataStore.getAccounts(owner);
+	}
+
+	public Set<Record> getRecords(Account account) {
+		return dataStore.getRecords(account);
+	}
+
+	public void addRecord(Account account, Record record) {
+		dataStore.addRecord(account, record);
+	}
+
+	public User registerNewUser(String userName, char[] pass) {
+		if (!isUserRegistered(userName)) {
+			User user = new User(userName, pass);
+			dataStore.addUser(user);
+			return user;
+		}
+		return null;
+	}
+
+	private boolean isPasswordCorrect(User user, char[] pass) {
+		return (user.getPassHash().length == pass.length) && Arrays.equals(user.getPassHash(), pass);
+	}
+
+	private User getUserByName(String userName) {
+		return dataStore.getUser(userName);
+	}
+
+}
+
+
+package arhangel.dim.fm.gui;
+
+import arhangel.dim.fm.Account;
+import arhangel.dim.fm.Controller;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
+
+/**
+ *
+ */
+public class AccountsPanel extends JPanel implements ActionListener, ListSelectionListener {
+
+    private static final String CMD_ADD_ACCOUNT = "cmd_add_account";
+
+    private Controller controller;
+
+    private JList<Account> accountsList;
+    private JButton addAccountButton;
+    private DefaultListModel<Account> accountListModel;
+
+    public AccountsPanel(Controller controller) {
+        this.controller = controller;
+
+        accountListModel = new DefaultListModel<>();
+        accountsList = new JList<>();
+        accountsList.setModel(accountListModel);
+        accountsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        accountsList.setLayoutOrientation(JList.VERTICAL);
+        accountsList.addListSelectionListener(this);
+
+        addAccountButton = new JButton("Add new account");
+        addAccountButton.addActionListener(this);
+        addAccountButton.setActionCommand(CMD_ADD_ACCOUNT);
+
+        add(accountsList);
+        add(addAccountButton);
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String cmd = e.getActionCommand();
+        if (CMD_ADD_ACCOUNT.equals(cmd)) {
+            System.out.println("Add new acc");
+            int i = new Random().nextInt();
+            Account account = new Account();
+            account.setDescription("acc" + i);
+            accountListModel.addElement(account);
+        }
+    }
+
+    @Override
+    public void valueChanged(ListSelectionEvent e) {
+        if (!e.getValueIsAdjusting()) {
+            System.out.println(e.getFirstIndex());
+        }
+    }
+}
+
+
+package arhangel.dim.fm.gui;
+
+import arhangel.dim.fm.Controller;
+
+import javax.swing.*;
+
+/**
+ *
+ */
+public class Demo {
+
+    public static void main(String[] args) {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                createAndShowGUI();
+            }
+        });
+    }
+
+    private static void createAndShowGUI() {
+
+        JFrame frame = new JFrame("ButtonDemo");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        Controller controller = new Controller();
+        LoginPanel newContentPane = new LoginPanel(frame, controller);
+        newContentPane.setOpaque(true); //content panes must be opaque
+        frame.setContentPane(newContentPane);
+        frame.pack();
+        frame.setVisible(true);
+    }
+}
+
+
+package arhangel.dim.fm.gui;
+
+import arhangel.dim.fm.Account;
+import arhangel.dim.fm.Controller;
+import arhangel.dim.fm.User;
+
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
+
+/**
+ *
+ */
+public class LoginPanel extends JPanel implements ActionListener {
+
+	private JButton loginButton;
+	private JButton regButton;
+	private JTextField loginField;
+	private JPasswordField passField;
+	private JTextArea infoArea;
+
+	private Controller controller;
+    private JFrame parent;
+
+	private static final String CMD_LOGIN = "cmd_login";
+	private static final String CMD_REG = "cmd_reg";
+
+	public LoginPanel(JFrame parent, Controller controller) {
+		this.controller = controller;
+        this.parent = parent;
+		loginButton = new JButton("Login");
+		regButton = new JButton("Register");
+		loginField = new JTextField(10);
+		passField = new JPasswordField(10);
+		infoArea = new JTextArea();
+
+		loginButton.addActionListener(this);
+		loginButton.setActionCommand(CMD_LOGIN);
+		regButton.addActionListener(this);
+		regButton.setActionCommand(CMD_REG);
+
+		add(loginButton);
+		add(regButton);
+		add(loginField);
+		add(passField);
+		add(infoArea);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		String cmd = e.getActionCommand();
+		char[] input = passField.getPassword();
+		String name = loginField.getText();
+		if (input.length == 0 || name.trim().length() == 0) {
+			infoArea.setText("Empty login/pass");
+			return;
+		}
+		if (CMD_LOGIN.equals(cmd)) {
+			System.out.println("Login");
+			User user = controller.login(name, input);
+			if (user == null) {
+				infoArea.setText("Invalid user/password.");
+			} else {
+                showAccounts(user);
+			}
+		} else if (CMD_REG.equals(cmd)) {
+			System.out.println("Register");
+			User user = controller.registerNewUser(name, input);
+			if (user == null) {
+				infoArea.setText("User: " + name + " already exist");
+			} else {
+                showAccounts(user);
+			}
+		}
+		passField.setText("");
+		loginField.setText("");
+
+	}
+
+	private void showAccounts(User user) {
+		controller.setCurrentUser(user);
+
+        Account a = new Account();
+        a.setDescription("General");
+        controller.addAccount(user, a);
+		parent.setContentPane(new AccountsPanel(controller));
+        setVisible(false);
+        parent.pack();
+
+	}
+}
+
+
+package arhangel.dim.fm;
+
+import java.math.BigDecimal;
+import java.util.Set;
+
+import junit.framework.TestCase;
+
+/**
+ *
+ */
+public class ControllerTest extends TestCase {
+
+	public void testLogin() throws Exception {
+		Controller controller = new Controller();
+		String userName = "test";
+		char[] pass = "#test".toCharArray();
+		User user = controller.login(userName, pass);
+		assertNull(user);
+
+		user = controller.registerNewUser(userName, pass);
+		assertNotNull(user);
+		user = controller.login(userName, pass);
+		assertNotNull(user);
+	}
+
+	public void testAccounts() throws Exception {
+		Controller controller = new Controller();
+		String userName = "test";
+		char[] pass = "#test".toCharArray();
+		User user = controller.registerNewUser(userName, pass);
+
+		Set<Account> accounts = controller.getAccounts(user);
+		assertEquals(0, accounts.size());
+		Account account = new Account();
+		account.setDescription("General account");
+		controller.addAccount(user, account);
+
+		accounts = controller.getAccounts(user);
+		assertEquals(1, accounts.size());
+
+	}
+
+	public void testRecords() throws Exception {
+		Controller controller = new Controller();
+		String userName = "test";
+        char[] pass = "#test".toCharArray();
+        User user = controller.registerNewUser(userName, pass);
+
+        Account account = new Account();
+		account.setDescription("General account");
+		controller.addAccount(user, account);
+
+		assertEquals(0, controller.getRecords(account).size());
+
+		Record record = new Record();
+		record.setPut(true);
+		record.setDescription("First blood");
+		record.setSum(new BigDecimal(100.30));
+		controller.addRecord(account, record);
+
+		assertEquals(1, controller.getRecords(account).size());
+
+	}
+}
