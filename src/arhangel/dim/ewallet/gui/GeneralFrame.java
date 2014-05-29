@@ -105,8 +105,10 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
             account.setDescription("acc" + i);
             accountListModel.addElement(account);
         } else  if (CMD_ADD_RECORD.equals(cmd)) {
-            JDialog dialog = new RecordDialog(this, true, null);
+            RecordDialog dialog = new RecordDialog(this, true, null);
             dialog.setVisible(true);
+            System.out.println("Created record: " + dialog.getRecord());
+
         }
     }
 
