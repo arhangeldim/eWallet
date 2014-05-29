@@ -36,6 +36,10 @@ public class Account {
 
     @Override
     public String toString() {
-        return "Account: [" + description + "]";
+        return "Account{" +
+                "id=" + id +
+                ", description='" + description + '\'' +
+                ", amount=" + amount +
+                '}';
     }
 }

@@ -5,15 +5,23 @@ package arhangel.dim.ewallet.entity;
  */
 public class User {
     private String name;
-    private char[] passHash;
+    private String pass;
 
     public User() {
 
     }
 
-    public User(String name, char[] passHash) {
+    public void setPass(String pass) {
+        this.pass = pass;
+    }
+
+    public String getPass() {
+        return pass;
+    }
+
+    public User(String name, String pass) {
         this.name = name;
-        this.passHash = passHash;
+        this.pass = pass;
     }
 
     public String getName() {
@@ -24,17 +32,11 @@ public class User {
         this.name = name;
     }
 
-    public char[] getPassHash() {
-        return passHash;
-    }
 
-    public void setPassHash(char[] passHash) {
-        this.passHash = passHash;
-    }
 
     @Override
     public String toString() {
-        return "User: [" + name + ", " + passHash + "];";
+        return "User: [" + name + ", " + pass + "];";
     }
 
 }

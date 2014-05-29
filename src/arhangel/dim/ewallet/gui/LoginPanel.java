@@ -62,15 +62,15 @@ public class LoginPanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
-        char[] input = passField.getPassword();
+        String pass = new String(passField.getPassword());
         String name = loginField.getText();
-        if (input.length == 0 || name.trim().length() == 0) {
+
+        if (pass.trim().isEmpty() || name.trim().isEmpty()) {
             infoArea.setText("Empty login/pass");
             return;
         }
         if (CMD_LOGIN.equals(cmd)) {
-            System.out.println("Login");
-            User user = controller.login(name, input);
+            User user = controller.login(name, pass);
             if (user == null) {
                 infoArea.setText("Invalid user/password.");
             } else {
@@ -78,7 +78,7 @@ public class LoginPanel extends JPanel implements ActionListener {
             }
         } else if (CMD_REG.equals(cmd)) {
             System.out.println("Register");
-            User user = controller.registerNewUser(name, input);
+            User user = controller.registerNewUser(name, pass);
             if (user == null) {
                 infoArea.setText("User: " + name + " already exist");
             } else {
@@ -92,15 +92,10 @@ public class LoginPanel extends JPanel implements ActionListener {
 
     private void showAccounts(User user) {
         controller.setCurrentUser(user);
-
-        Account a = new Account();
-        a.setDescription("General");
-        controller.addAccount(user, a);
-        //parent.setContentPane(new AccountsPanel(controller));
         setVisible(false);
         JFrame general = new GeneralFrame(controller);
         general.setVisible(true);
-        //parent.pack();
+        parent.setVisible(false);
 
     }
 }

@@ -44,5 +44,15 @@ public class Record {
     public void setPut(boolean put) {
         isPut = put;
     }
+
+    @Override
+    public String toString() {
+        return "Record{" +
+                "description='" + description + '\'' +
+                ", sum=" + sum +
+                ", date=" + date +
+                ", isPut=" + isPut +
+                '}';
+    }
 }
 

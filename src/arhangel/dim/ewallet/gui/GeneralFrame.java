@@ -11,6 +11,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -21,7 +22,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     private static final String CMD_ADD_RECORD = "cmd_add_record";
 
     private Controller controller;
-    private JList<Account> accountsList;
+    final private JList<Account> accountsList;
     private JList<Record> recordsList;
     private JButton addAccountButton;
     private JButton addRecordButton;
@@ -39,6 +40,12 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         JPanel accountsPanel = new JPanel();
         accountsPanel.setLayout(new BoxLayout(accountsPanel, BoxLayout.Y_AXIS));
         accountListModel = new DefaultListModel<>();
+
+        Set<Account> accounts = controller.getAccounts(controller.getCurrentUser());
+        for (Account account : accounts) {
+            accountListModel.addElement(account);
+        }
+
         accountsList = new JList<>();
         accountsList.setModel(accountListModel);
         accountsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -74,6 +81,14 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
 
     }
 
+    private void showRecords(Account account) {
+        recordsListModel.clear();
+        Set<Record> records = controller.getRecords(account);
+        for (Record r : records) {
+            recordsListModel.addElement(r);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
@@ -92,9 +107,8 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-            System.out.println(e.getFirstIndex());
-            Account selected = accountListModel.elementAt(e.getFirstIndex());
-            System.out.println(selected.toString());
+            Account account = accountsList.getSelectedValue();
+            showRecords(account);
         }
     }
 

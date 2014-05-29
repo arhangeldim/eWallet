@@ -1,10 +1,11 @@
 package arhangel.dim.ewallet;
 
+import arhangel.dim.ewallet.db.DbDataStore;
 import arhangel.dim.ewallet.entity.Account;
 import arhangel.dim.ewallet.entity.Record;
 import arhangel.dim.ewallet.entity.User;
+import com.sun.istack.internal.logging.Logger;
 
-import java.util.Arrays;
 import java.util.Set;
 
 /**
@@ -12,11 +13,13 @@ import java.util.Set;
  */
 public class Controller {
 
+    private static Logger logger = Logger.getLogger(Controller.class);
+
     private DataStore dataStore;
     private User currentUser;
 
     public Controller() {
-        dataStore = new MemoryDataStore();
+        dataStore = new DbDataStore();
     }
 
     private boolean isUserRegistered(String userName) {
@@ -31,7 +34,8 @@ public class Controller {
         this.currentUser = currentUser;
     }
 
-    public User login(String name, char[] pass) {
+    public User login(String name, String pass) {
+        logger.info("Logon: " + name);
         if (isUserRegistered(name)) {
             User user = getUserByName(name);
             if (isPasswordCorrect(user, pass)) {
@@ -57,7 +61,7 @@ public class Controller {
         dataStore.addRecord(account, record);
     }
 
-    public User registerNewUser(String userName, char[] pass) {
+    public User registerNewUser(String userName, String pass) {
         if (!isUserRegistered(userName)) {
             User user = new User(userName, pass);
             dataStore.addUser(user);
@@ -66,8 +70,10 @@ public class Controller {
         return null;
     }
 
-    private boolean isPasswordCorrect(User user, char[] pass) {
-        return (user.getPassHash().length == pass.length) && Arrays.equals(user.getPassHash(), pass);
+    private boolean isPasswordCorrect(User user, String pass) {
+        boolean isCorrect = user.getPass().equals(pass);
+        logger.info("Password: " + isCorrect + " (" + user.getPass() + ", " + pass + ");");
+        return isCorrect;
     }
 
     private User getUserByName(String userName) {
