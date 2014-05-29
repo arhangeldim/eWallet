@@ -60,21 +60,27 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
 
         // Records panel
         JPanel recordsPanel = new JPanel();
+        recordsPanel.setLayout(new BoxLayout(recordsPanel, BoxLayout.Y_AXIS));
         recordsListModel = new DefaultListModel<>();
         recordsList = new JList<>();
         recordsList.setModel(recordsListModel);
         recordsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         recordsList.setLayoutOrientation(JList.VERTICAL);
-        recordsList.addListSelectionListener(GeneralFrame.this);
+        recordsList.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                System.out.println("Selected: " + e.toString());
+            }
+        });
         addRecordButton = new JButton("Add");
-        addRecordButton.addActionListener(GeneralFrame.this);
+        addRecordButton.addActionListener(this);
         addRecordButton.setActionCommand(CMD_ADD_RECORD);
         JScrollPane recordScrollPane = new JScrollPane(recordsList);
         recordsPanel.add(recordScrollPane);
         recordsPanel.add(addRecordButton);
 
         getContentPane().add(accountsPanel, BorderLayout.WEST);
-        getContentPane().add(recordsPanel, BorderLayout.CENTER);
+        getContentPane().add(recordsPanel, BorderLayout.EAST);
 
         pack();
         setVisible(true);
