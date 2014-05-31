@@ -10,6 +10,7 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Iterator;
 import java.util.Random;
 import java.util.Set;
 
@@ -45,12 +46,13 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         for (Account account : accounts) {
             accountListModel.addElement(account);
         }
-
         accountsList = new JList<>();
         accountsList.setModel(accountListModel);
         accountsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         accountsList.setLayoutOrientation(JList.VERTICAL);
         accountsList.addListSelectionListener(this);
+
+
         addAccountButton = new JButton("Add new account");
         addAccountButton.addActionListener(this);
         addAccountButton.setActionCommand(CMD_ADD_ACCOUNT);
@@ -69,9 +71,17 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         recordsList.addListSelectionListener(new ListSelectionListener() {
             @Override
             public void valueChanged(ListSelectionEvent e) {
-                System.out.println("Selected: " + e.toString());
+                //
             }
         });
+
+        if (!accountListModel.isEmpty()) {
+            Iterator<Account> iter = accounts.iterator();
+            if (iter.hasNext()) {
+                showRecords(iter.next());
+            }
+        }
+
         addRecordButton = new JButton("Add");
         addRecordButton.addActionListener(this);
         addRecordButton.setActionCommand(CMD_ADD_RECORD);
@@ -99,16 +109,15 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         if (CMD_ADD_ACCOUNT.equals(cmd)) {
-            System.out.println("Add new acc");
             int i = new Random().nextInt();
             Account account = new Account();
             account.setDescription("acc" + i);
             accountListModel.addElement(account);
-        } else  if (CMD_ADD_RECORD.equals(cmd)) {
-            RecordDialog dialog = new RecordDialog(this, true, null);
+        } else if (CMD_ADD_RECORD.equals(cmd)) {
+            RecordDialog dialog = new RecordDialog(controller);
+            dialog.setModal(true);
             dialog.setVisible(true);
-            System.out.println("Created record: " + dialog.getRecord());
-
+            showRecords(controller.getCurrentAccount());
         }
     }
 
@@ -116,6 +125,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
             Account account = accountsList.getSelectedValue();
+            controller.setCurrentAccount(account);
             showRecords(account);
         }
     }

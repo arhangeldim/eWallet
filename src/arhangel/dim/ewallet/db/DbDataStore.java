@@ -4,7 +4,9 @@ import arhangel.dim.ewallet.DataStore;
 import arhangel.dim.ewallet.entity.Account;
 import arhangel.dim.ewallet.entity.Record;
 import arhangel.dim.ewallet.entity.User;
-import com.sun.istack.internal.logging.Logger;
+import arhangel.dim.ewallet.gui.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.sql.PreparedStatement;
@@ -12,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -20,26 +21,30 @@ import java.util.Set;
  */
 public class DbDataStore implements DataStore {
 
-    private static Logger logger = Logger.getLogger(DbDataStore.class);
-
-    public static void main(String[] args) {
-        DbDataStore ds = new DbDataStore();
-        User user = ds.getUser("Alisa");
-        System.out.println(ds.getUserNames());
-        Set<Account> accs = ds.getAccounts(user);
-        Iterator<Account> accIter = accs.iterator();
-        while (accIter.hasNext()) {
-            Account a = accIter.next();
-            System.out.println(a);
-            Set<Record> recs = ds.getRecords(a);
-            System.out.println(recs);
-        }
-
-
-        System.out.println("list" + ds.getUserNames());
-    }
+    private static Logger logger = LoggerFactory.getLogger(DbDataStore.class);
 
     DbHelper dbHelper = new DbHelper();
+
+    @Override
+    public Set<Category> getCategories() {
+        Set<Category> categories = new HashSet<>();
+        try {
+            Statement stmt = dbHelper.getConn().createStatement();
+            ResultSet rs = stmt.executeQuery("SELECT * FROM CATEGORIES;");
+            while (rs.next()) {
+                int id = rs.getInt(1);
+                String name = rs.getString(2);
+                Category cat = new Category();
+                cat.setId(id);
+                cat.setName(name);
+                categories.add(cat);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        logger.debug("categories: {}", categories);
+        return categories;
+    }
 
     @Override
     public User getUser(String name) {
@@ -54,12 +59,11 @@ public class DbDataStore implements DataStore {
                 user = new User();
                 user.setName(userName);
                 user.setPass(pass);
-                System.out.println("USER: " + user);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        logger.info("getUser(): " + user);
+        logger.debug("getUser(): " + user);
         return user;
     }
 
@@ -77,6 +81,7 @@ public class DbDataStore implements DataStore {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        logger.debug("Users: {}", names);
         return names;
     }
 
@@ -96,6 +101,7 @@ public class DbDataStore implements DataStore {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        logger.debug("User: {} -> {}", owner, accounts);
         return accounts;
     }
 
@@ -104,7 +110,7 @@ public class DbDataStore implements DataStore {
         Set<Record> records = new HashSet<>();
 
         try {
-            PreparedStatement pStmt = dbHelper.getConn().prepareStatement("SELECT * FROM RECORDS WHERE ACCOUNT_ID=?");
+            PreparedStatement pStmt = dbHelper.getConn().prepareStatement("SELECT * FROM RECORDS WHERE ACCOUNT_ID=? ");
             pStmt.setInt(1, account.getId());
             ResultSet rs = pStmt.executeQuery();
             while (rs.next()) {
@@ -116,11 +122,13 @@ public class DbDataStore implements DataStore {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        logger.debug("Account: {} -> {}", account, records);
         return records;
     }
 
     @Override
     public void addUser(User user) {
+        logger.debug("Adding new user: {}", user);
         try {
             PreparedStatement pStmt = dbHelper.getConn().prepareStatement("INSERT INTO USERS (NAME, PASSWORD) VALUES (?, ?);");
             pStmt.setString(1, user.getName());
@@ -130,10 +138,12 @@ public class DbDataStore implements DataStore {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
     }
 
     @Override
     public void addAccount(User user, Account account) {
+        logger.debug("Adding account {} -> {}", user, account);
         try {
             PreparedStatement pStmt = dbHelper.getConn().prepareStatement("INSERT INTO ACCOUNTS (DESCR, USER_NAME) VALUES (?, ?);");
             pStmt.setString(1, account.getDescription());
@@ -147,6 +157,7 @@ public class DbDataStore implements DataStore {
 
     @Override
     public void addRecord(Account account, Record record) {
+        logger.debug("Adding record {}->{}", account, record);
         try {
             PreparedStatement pStmt = dbHelper.getConn().prepareStatement("INSERT INTO RECORDS (DESCR, AMOUNT, ACCOUNT_ID) VALUES (?, ?, ?);");
             pStmt.setString(1, record.getDescription());

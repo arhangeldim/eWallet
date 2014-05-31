@@ -2,107 +2,132 @@ package arhangel.dim.ewallet.gui;
 
 import arhangel.dim.ewallet.Controller;
 import arhangel.dim.ewallet.entity.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
 
 /**
  *
  */
 public class RecordDialog extends JDialog implements ActionListener {
+    private static Logger logger = LoggerFactory.getLogger(RecordDialog.class);
 
-    private static final String CMD_CANCEL = "cmd_cancel";
-    private static final String CMD_OK = "cmd_ok";
+    private static final String CMD_PUT_ACTION = "cmd_put";
+    private static final String CMD_CALL_ACTION = "cmd_call";
+    private static final String CMD_CANCEL_ACTION = "cmd_cancel";
+    private static final String CMD_SAVE_ACTION = "cmd_save";
 
     private Controller controller;
-    private JPanel panel;
-    private JButton cancelButton;
-    private JButton okButton;
-
+    private boolean isPut = false;
+    private JTextArea descrArea;
     private JTextField sumField;
-    private JTextField descriptionField;
-    private JList<Category> categoryList;
+    private JComboBox<Category> categoryBox;
 
-    private Record record;
-
-
-    public RecordDialog(JFrame frame, boolean modal, Controller controller) {
-        super(frame, modal);
-        setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        addWindowListener(new WinListener());
-
+    public RecordDialog(Controller controller) {
+        super();
         this.controller = controller;
 
-        JPanel buttonPane = new JPanel();
-        cancelButton = new JButton("Cancel");
-        cancelButton.setActionCommand(CMD_CANCEL);
+        GridBagLayout layout = new GridBagLayout();
+        setLayout(layout);
+        setSize(300, 400);
+            /* Create radio button group */
+        JRadioButton putButton = new JRadioButton("Put");
+        JRadioButton callButton = new JRadioButton("Call");
+        putButton.setActionCommand(CMD_PUT_ACTION);
+        callButton.setActionCommand(CMD_CALL_ACTION);
+        putButton.addActionListener(this);
+        callButton.addActionListener(this);
+        ButtonGroup putCallGroup = new ButtonGroup();
+        putCallGroup.add(putButton);
+        putCallGroup.add(callButton);
+        callButton.setSelected(true);
+
+        descrArea = new JTextArea(5, 10);
+        descrArea.setLineWrap(true);
+
+        sumField = new JTextField(10);
+
+            /* Create list of category */
+        DefaultComboBoxModel<Category> boxModel = new DefaultComboBoxModel<>();
+        for (Category c : controller.getCategories()) {
+            boxModel.addElement(c);
+        }
+        categoryBox = new JComboBox<>(boxModel);
+        categoryBox.setSelectedIndex(0);
+
+            /* Save/Cancel buttons */
+        final JButton cancelButton = new JButton("Cancel");
+        cancelButton.setActionCommand(CMD_CANCEL_ACTION);
         cancelButton.addActionListener(this);
-        okButton = new JButton("Ok");
-        okButton.setActionCommand(CMD_OK);
-        okButton.addActionListener(this);
-        buttonPane.add(okButton);
-        buttonPane.add(cancelButton);
+        final JButton saveButton = new JButton("Save");
+        saveButton.setActionCommand(CMD_SAVE_ACTION);
+        saveButton.addActionListener(this);
 
-        JPanel fieldPane = new JPanel();
-        fieldPane.setLayout(new BoxLayout(fieldPane, BoxLayout.Y_AXIS));
-        sumField = new JTextField();
-        descriptionField = new JTextField();
-        sumField.setColumns(20);
-        descriptionField.setColumns(20);
-        fieldPane.add(sumField);
-        fieldPane.add(descriptionField);
+            /* Layout management */
+        Insets insets5 = new Insets(5, 5, 5, 5);
 
-        JPanel labelPane = new JPanel();
-        labelPane.setLayout(new BoxLayout(labelPane, BoxLayout.Y_AXIS));
-        JTextArea sumLabel = new JTextArea("Sum:");
-        JTextArea descLabel = new JTextArea("Description:");
-        labelPane.add(sumLabel);
-        labelPane.add(descLabel);
+        add(new JLabel("New Record"), new GridBagConstraints(0, 0, 3, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.NORTH, insets5, 0, 0));
 
-        JPanel editPane = new JPanel();
-        editPane.add(labelPane);
-        editPane.add(fieldPane);
+        add(callButton, new GridBagConstraints(0, 1, 1, 1, 0, 0,
+                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
+        add(putButton, new GridBagConstraints(0, 2, 1, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 5, 0, 5), 0, 0));
 
-        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-        getContentPane().add(editPane);
-        getContentPane().add(buttonPane);
+        add(new JLabel("Sum"), new GridBagConstraints(0, 3, 1, 1, 0, 0,
+                GridBagConstraints.WEST, GridBagConstraints.WEST, insets5, 0, 0));
+        add(sumField, new GridBagConstraints(1, 3, 2, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, insets5, 0, 0));
 
-        pack();
-        setLocationRelativeTo(frame);
-        setVisible(true);
-    }
+        add(new JLabel("Description"), new GridBagConstraints(0, 4, 1, 1, 0, 0,
+                GridBagConstraints.NORTHWEST, GridBagConstraints.HORIZONTAL, insets5, 0, 0));
+        add(descrArea, new GridBagConstraints(1, 4, 2, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, insets5, 0, 0));
 
-    public Record getRecord() {
-        return record;
-    }
+        add(new JLabel("Category"), new GridBagConstraints(0, 5, 1, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, insets5, 0, 0));
+        add(categoryBox, new GridBagConstraints(1, 5, 2, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, insets5, 0, 0));
 
-    public void setRecord(Record record) {
-        this.record = record;
+        add(cancelButton, new GridBagConstraints(1, 6, 1, 1, 0, 0,
+                GridBagConstraints.LINE_END, GridBagConstraints.NONE, insets5, 0, 0));
+        add(saveButton, new GridBagConstraints(2, 6, 1, 1, 0, 0,
+                GridBagConstraints.EAST, GridBagConstraints.NONE, insets5, 0, 0));
+
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        logger.info("pressed: {}", e.getActionCommand());
         String cmd = e.getActionCommand();
-        if (CMD_OK.equals(cmd)) {
+        switch (cmd) {
+            case CMD_CANCEL_ACTION:
+                dispose();
+                break;
+            case CMD_SAVE_ACTION:
+                logger.debug("isPut: {}", isPut);
+                Record record = new Record();
+                String sum = sumField.getText();
+                Category category = (Category) categoryBox.getSelectedItem();
+                record.setDescription(descrArea.getText());
+                record.setPut(isPut);
+                record.setCategory(category);
+                record.setSum(new BigDecimal(sum));
+                controller.addRecord(controller.getCurrentAccount(), record);
+                dispose();
+                break;
+            case CMD_PUT_ACTION:
+                isPut = true;
+                break;
+            case CMD_CALL_ACTION:
+                isPut = false;
+                break;
 
-            if (sumField.getText().isEmpty()) {
-                return;
-            } else {
-                record = new Record();
-                record.setSum(new BigDecimal(sumField.getText()));
-                record.setDescription(descriptionField.getText());
-            }
-        }
-        RecordDialog.this.dispose();
-    }
-
-    class WinListener extends WindowAdapter {
-        public void windowClosing(WindowEvent e) {
-            dispose();
         }
     }
 }

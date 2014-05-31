@@ -3,6 +3,7 @@ package arhangel.dim.ewallet;
 import arhangel.dim.ewallet.entity.Account;
 import arhangel.dim.ewallet.entity.Record;
 import arhangel.dim.ewallet.entity.User;
+import arhangel.dim.ewallet.gui.Category;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +18,12 @@ public class MemoryDataStore implements DataStore {
     private Map<String, User> users = new HashMap<>();
     private Map<User, Set<Account>> accounts = new HashMap<>();
     private Map<Account, Set<Record>> records = new HashMap<>();
+
+
+    @Override
+    public Set<Category> getCategories() {
+        return null;
+    }
 
     @Override
     public User getUser(String name) {

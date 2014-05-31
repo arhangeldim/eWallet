@@ -1,5 +1,7 @@
 package arhangel.dim.ewallet.entity;
 
+import arhangel.dim.ewallet.gui.Category;
+
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -11,7 +13,15 @@ public class Record {
     private BigDecimal sum;
     private Date date;
     private boolean isPut;
+    private Category category;
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
 
     public String getDescription() {
         return description;

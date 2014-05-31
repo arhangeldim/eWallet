@@ -24,7 +24,7 @@ public class Demo {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         Controller controller = new Controller();
         LoginPanel loginPanel = new LoginPanel(frame, controller);
-        loginPanel.setOpaque(true); //content panes must be opaque
+        loginPanel.setOpaque(true);
 
         frame.setSize(new Dimension(400, 300));
         frame.setLayout(new BorderLayout());

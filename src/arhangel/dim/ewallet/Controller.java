@@ -4,7 +4,9 @@ import arhangel.dim.ewallet.db.DbDataStore;
 import arhangel.dim.ewallet.entity.Account;
 import arhangel.dim.ewallet.entity.Record;
 import arhangel.dim.ewallet.entity.User;
-import com.sun.istack.internal.logging.Logger;
+import arhangel.dim.ewallet.gui.Category;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Set;
 
@@ -13,10 +15,11 @@ import java.util.Set;
  */
 public class Controller {
 
-    private static Logger logger = Logger.getLogger(Controller.class);
+    private static Logger logger = LoggerFactory.getLogger(Controller.class);
 
     private DataStore dataStore;
     private User currentUser;
+    private Account currentAccount;
 
     public Controller() {
         dataStore = new DbDataStore();
@@ -24,6 +27,14 @@ public class Controller {
 
     private boolean isUserRegistered(String userName) {
         return dataStore.getUser(userName) != null;
+    }
+
+    public Account getCurrentAccount() {
+        return currentAccount;
+    }
+
+    public void setCurrentAccount(Account currentAccount) {
+        this.currentAccount = currentAccount;
     }
 
     public User getCurrentUser() {
@@ -43,6 +54,10 @@ public class Controller {
             }
         }
         return null;
+    }
+
+    public Set<Category> getCategories() {
+        return dataStore.getCategories();
     }
 
     public void addAccount(User owner, Account account) {
@@ -72,7 +87,6 @@ public class Controller {
 
     private boolean isPasswordCorrect(User user, String pass) {
         boolean isCorrect = user.getPass().equals(pass);
-        logger.info("Password: " + isCorrect + " (" + user.getPass() + ", " + pass + ");");
         return isCorrect;
     }
 

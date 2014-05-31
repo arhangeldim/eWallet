@@ -48,7 +48,8 @@ public class RecordsPanel extends JPanel implements ActionListener, ListSelectio
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
         if (CMD_ADD.equals(cmd)) {
-            JDialog dialog = new RecordDialog(parent, true, null);
+            JDialog dialog = new RecordDialog(controller);
+            dialog.setModal(true);
 
 
         }
