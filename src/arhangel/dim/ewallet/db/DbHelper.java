@@ -1,5 +1,8 @@
 package arhangel.dim.ewallet.db;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -10,15 +13,16 @@ import java.sql.Statement;
  */
 public class DbHelper {
 
+    private static Logger logger = LoggerFactory.getLogger(DbHelper.class);
     private Connection conn;
-
 
     public DbHelper() {
         try {
             Class.forName("org.sqlite.JDBC");
-            conn = DriverManager.getConnection("jdbc:sqlite:test.db");
+            String databaseUrl = "jdbc:sqlite:test.db";
+            logger.info("Opening database: {}", databaseUrl);
+            conn = DriverManager.getConnection(databaseUrl);
 
-            System.out.println("Opened database successfully");
             if (!isTablesExist()) {
                 Statement stmt = conn.createStatement();
                 String createSql = readResource(DbHelper.class, "create.sql");
@@ -28,7 +32,6 @@ public class DbHelper {
                 stmt.executeUpdate(insertSql);
                 stmt.close();
             }
-
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(0);

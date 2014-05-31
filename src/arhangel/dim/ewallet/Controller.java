@@ -86,8 +86,7 @@ public class Controller {
     }
 
     private boolean isPasswordCorrect(User user, String pass) {
-        boolean isCorrect = user.getPass().equals(pass);
-        return isCorrect;
+        return user.getPass().equals(pass);
     }
 
     private User getUserByName(String userName) {

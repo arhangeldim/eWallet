@@ -23,7 +23,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     private static final String CMD_ADD_RECORD = "cmd_add_record";
 
     private Controller controller;
-    final private JList<Account> accountsList;
+    private JList<Account> accountsList;
     private JList<Record> recordsList;
     private JButton addAccountButton;
     private JButton addRecordButton;
@@ -34,8 +34,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         super("eWallet");
         this.controller = controller;
         setBounds(100, 100, 200, 200);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //setSize(new Dimension(400, 300));
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         // Accounts panel
         JPanel accountsPanel = new JPanel();

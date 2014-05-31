@@ -1,7 +1,6 @@
 package arhangel.dim.ewallet.gui;
 
 import arhangel.dim.ewallet.Controller;
-import arhangel.dim.ewallet.entity.Account;
 import arhangel.dim.ewallet.entity.User;
 
 import javax.swing.*;
@@ -31,7 +30,7 @@ public class LoginPanel extends JPanel implements ActionListener {
         this.parent = parent;
 
         setLayout(new BorderLayout());
-        setSize(new Dimension(300 ,200));
+        setSize(new Dimension(300, 200));
 
         JPanel fieldPane = new JPanel();
         JPanel buttonPane = new JPanel();
@@ -50,12 +49,12 @@ public class LoginPanel extends JPanel implements ActionListener {
         buttonPane.add(regButton);
         buttonPane.add(loginButton);
 
-        fieldPane.setLayout(new BoxLayout(fieldPane,BoxLayout.Y_AXIS));
+        fieldPane.setLayout(new BoxLayout(fieldPane, BoxLayout.Y_AXIS));
         fieldPane.add(loginField);
         fieldPane.add(passField);
 
         add(fieldPane, BorderLayout.NORTH);
-        add(buttonPane,BorderLayout.CENTER);
+        add(buttonPane, BorderLayout.CENTER);
         add(infoArea, BorderLayout.SOUTH);
     }
 

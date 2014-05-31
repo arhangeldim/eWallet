@@ -21,7 +21,7 @@ public class Demo {
     private static void createAndShowGUI() {
 
         JFrame frame = new JFrame("ButtonDemo");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Controller controller = new Controller();
         LoginPanel loginPanel = new LoginPanel(frame, controller);
         loginPanel.setOpaque(true);
