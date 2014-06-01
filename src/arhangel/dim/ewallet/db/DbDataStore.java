@@ -117,6 +117,10 @@ public class DbDataStore implements DataStore {
                 Record record = new Record();
                 record.setDescription(rs.getString(rs.findColumn("DESCR")));
                 record.setSum(new BigDecimal(rs.getFloat(rs.findColumn("AMOUNT"))));
+                int categoryId = (rs.getInt(rs.findColumn("CATEGORY_ID")));
+                record.setCategory(getCategoryById(categoryId));
+                int putField = rs.getInt(rs.findColumn("IS_PUT"));
+                record.setPut(putField == 1);
                 records.add(record);
             }
         } catch (SQLException e) {
@@ -124,6 +128,25 @@ public class DbDataStore implements DataStore {
         }
         logger.debug("Account: {} -> {}", account, records);
         return records;
+    }
+
+    private Category getCategoryById(int id) {
+        Category category = null;
+        logger.debug("Get category {}", id);
+        try {
+            PreparedStatement pStmt = dbHelper.getConn().prepareStatement("SELECT * FROM CATEGORIES WHERE ID=?");
+            pStmt.setInt(1, id);
+            ResultSet rs = pStmt.executeQuery();
+            if (rs.next()) {
+                category = new Category();
+                String name = rs.getString(rs.findColumn("NAME"));
+                category.setName(name);
+                category.setId(id);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return category;
     }
 
     @Override
@@ -159,10 +182,12 @@ public class DbDataStore implements DataStore {
     public void addRecord(Account account, Record record) {
         logger.debug("Adding record {}->{}", account, record);
         try {
-            PreparedStatement pStmt = dbHelper.getConn().prepareStatement("INSERT INTO RECORDS (DESCR, AMOUNT, ACCOUNT_ID) VALUES (?, ?, ?);");
+            PreparedStatement pStmt = dbHelper.getConn().prepareStatement("INSERT INTO RECORDS (DESCR, AMOUNT, IS_PUT, ACCOUNT_ID, CATEGORY_ID) VALUES (?, ?, ?, ?, ?);");
             pStmt.setString(1, record.getDescription());
             pStmt.setFloat(2, record.getSum().floatValue());
-            pStmt.setInt(3, account.getId());
+            pStmt.setInt(3, record.isPut() ? 1 : 0);
+            pStmt.setInt(4, account.getId());
+            pStmt.setInt(5, record.getCategory().getId());
             int result = pStmt.executeUpdate();
             logger.info("Add record " + account + ": " + result);
         } catch (SQLException e) {

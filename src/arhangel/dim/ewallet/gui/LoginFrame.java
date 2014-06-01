@@ -13,8 +13,6 @@ import java.awt.event.ActionListener;
  */
 public class LoginFrame extends JFrame implements ActionListener {
 
-    private JButton loginButton;
-    private JButton regButton;
     private JTextField loginField;
     private JPasswordField passField;
     private JLabel infoLabel;
@@ -40,9 +38,9 @@ public class LoginFrame extends JFrame implements ActionListener {
         JPanel buttonPane = new JPanel();
         buttonPane.setPreferredSize(new Dimension(300, 50));
 
-        loginButton = new JButton("Login");
+        JButton loginButton = new JButton("Login");
         loginButton.setSize(new Dimension(70, 20));
-        regButton = new JButton("Register");
+        JButton regButton = new JButton("Register");
         regButton.setSize(new Dimension(70, 20));
         loginField = new JTextField(10);
         passField = new JPasswordField(10);
@@ -97,7 +95,6 @@ public class LoginFrame extends JFrame implements ActionListener {
     }
 
     private void showAccounts(User user) {
-        controller.setCurrentUser(user);
         setVisible(false);
         JFrame general = new GeneralFrame(controller);
         general.setVisible(true);

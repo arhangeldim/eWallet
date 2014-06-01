@@ -3,6 +3,8 @@ package arhangel.dim.ewallet.gui;
 import arhangel.dim.ewallet.Controller;
 import arhangel.dim.ewallet.entity.Account;
 import arhangel.dim.ewallet.entity.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -10,8 +12,6 @@ import javax.swing.event.ListSelectionListener;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Iterator;
-import java.util.Random;
 import java.util.Set;
 
 /**
@@ -19,51 +19,41 @@ import java.util.Set;
  */
 public class GeneralFrame extends JFrame implements ActionListener, ListSelectionListener {
 
+    private static final Logger logger = LoggerFactory.getLogger(GeneralFrame.class);
+
     private static final String CMD_ADD_ACCOUNT = "cmd_add_account";
+    private static final String CMD_DELETE_ACCOUNT = "cmd_delete_account";
+    private static final String CMD_EDIT_ACCOUNT = "cmd_edit_account";
     private static final String CMD_ADD_RECORD = "cmd_add_record";
 
     private Controller controller;
-    private JList<Account> accountsList;
     private JList<Record> recordsList;
+    private JComboBox<Account> accountBox;
     private JButton addAccountButton;
     private JButton addRecordButton;
     private DefaultListModel<Record> recordsListModel;
-    private DefaultListModel<Account> accountListModel;
 
     public GeneralFrame(Controller controller) {
         super("eWallet");
-        this.controller = controller;
-        setBounds(100, 100, 200, 200);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(new Dimension(600, 400));
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (int) ((dimension.getWidth() - getWidth()) / 2);
+        int y = (int) ((dimension.getHeight() - getHeight()) / 2);
+        setLocation(x, y);
+        this.controller = controller;
 
-        // Accounts panel
-        JPanel accountsPanel = new JPanel();
-        accountsPanel.setLayout(new BoxLayout(accountsPanel, BoxLayout.Y_AXIS));
-        accountListModel = new DefaultListModel<>();
-
-        Set<Account> accounts = controller.getAccounts(controller.getCurrentUser());
-        for (Account account : accounts) {
-            accountListModel.addElement(account);
+        /* Init account selector */
+        DefaultComboBoxModel<Account> boxModel = new DefaultComboBoxModel<>();
+        for (Account c : controller.getAccounts(controller.getCurrentUser())) {
+            boxModel.addElement(c);
         }
-        accountsList = new JList<>();
-        accountsList.setModel(accountListModel);
-        accountsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        accountsList.setLayoutOrientation(JList.VERTICAL);
-        accountsList.addListSelectionListener(this);
+        accountBox = new JComboBox<>(boxModel);
 
-
-        addAccountButton = new JButton("Add new account");
-        addAccountButton.addActionListener(this);
-        addAccountButton.setActionCommand(CMD_ADD_ACCOUNT);
-        JScrollPane accountScrollPane = new JScrollPane(accountsList);
-        accountsPanel.add(accountScrollPane);
-        accountsPanel.add(addAccountButton);
-
-        // Records panel
-        JPanel recordsPanel = new JPanel();
-        recordsPanel.setLayout(new BoxLayout(recordsPanel, BoxLayout.Y_AXIS));
+        /* Records list */
         recordsListModel = new DefaultListModel<>();
         recordsList = new JList<>();
+        recordsList.setCellRenderer(new RecordCellRenderer());
         recordsList.setModel(recordsListModel);
         recordsList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         recordsList.setLayoutOrientation(JList.VERTICAL);
@@ -74,26 +64,51 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
             }
         });
 
-        if (!accountListModel.isEmpty()) {
-            Iterator<Account> iter = accounts.iterator();
-            if (iter.hasNext()) {
-                showRecords(iter.next());
-            }
-        }
-
         addRecordButton = new JButton("Add");
         addRecordButton.addActionListener(this);
         addRecordButton.setActionCommand(CMD_ADD_RECORD);
         JScrollPane recordScrollPane = new JScrollPane(recordsList);
-        recordsPanel.add(recordScrollPane);
-        recordsPanel.add(addRecordButton);
 
-        getContentPane().add(accountsPanel, BorderLayout.WEST);
-        getContentPane().add(recordsPanel, BorderLayout.EAST);
+        /* Set selected account */
+        Account selectedAcc;
+        if ((selectedAcc = boxModel.getElementAt(0)) != null) {
+            controller.setCurrentAccount(selectedAcc);
+            accountBox.setSelectedIndex(0);
+            showRecords(selectedAcc);
+        }
+
+        add(accountBox, BorderLayout.WEST);
+        add(recordScrollPane, BorderLayout.CENTER);
+        add(addRecordButton, BorderLayout.SOUTH);
+
+        setJMenuBar(createMenu());
 
         pack();
         setVisible(true);
 
+    }
+
+    private JMenuBar createMenu() {
+        JMenuBar menuBar = new JMenuBar();
+        JMenu accountMenu = new JMenu("Account");
+
+        JMenuItem createAccount = new JMenuItem("Create");
+        createAccount.setActionCommand(CMD_ADD_ACCOUNT);
+        createAccount.addActionListener(this);
+        accountMenu.add(createAccount);
+
+        JMenuItem editAccount = new JMenuItem("Edit");
+        editAccount.setActionCommand(CMD_EDIT_ACCOUNT);
+        editAccount.addActionListener(this);
+        accountMenu.add(editAccount);
+
+        JMenuItem deleteAccount = new JMenuItem("Delete");
+        deleteAccount.setActionCommand(CMD_DELETE_ACCOUNT);
+        deleteAccount.addActionListener(this);
+        accountMenu.add(deleteAccount);
+
+        menuBar.add(accountMenu);
+        return menuBar;
     }
 
     private void showRecords(Account account) {
@@ -107,27 +122,36 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     @Override
     public void actionPerformed(ActionEvent e) {
         String cmd = e.getActionCommand();
-        if (CMD_ADD_ACCOUNT.equals(cmd)) {
-            int i = new Random().nextInt();
-            Account account = new Account();
-            account.setDescription("acc" + i);
-            accountListModel.addElement(account);
-        } else if (CMD_ADD_RECORD.equals(cmd)) {
-            RecordDialog dialog = new RecordDialog(controller);
-            dialog.setModal(true);
-            dialog.setVisible(true);
-            showRecords(controller.getCurrentAccount());
+        switch (cmd) {
+            case CMD_ADD_RECORD:
+                RecordDialog dialog = new RecordDialog(controller);
+                dialog.setModal(true);
+                dialog.setVisible(true);
+                showRecords(controller.getCurrentAccount());
+                break;
+            case CMD_EDIT_ACCOUNT:
+            case CMD_DELETE_ACCOUNT:
+            case CMD_ADD_ACCOUNT:
+                logger.info("Command: " + cmd);
+                break;
         }
     }
 
     @Override
     public void valueChanged(ListSelectionEvent e) {
         if (!e.getValueIsAdjusting()) {
-            Account account = accountsList.getSelectedValue();
+            Account account = (Account) accountBox.getSelectedItem();
             controller.setCurrentAccount(account);
             showRecords(account);
         }
     }
 
+    public static void main(String[] args) {
+        Controller c = new Controller();
+        c.login("Bob", "321");
+        GeneralFrame frame = new GeneralFrame(c);
+        frame.setVisible(true);
+
+    }
 
 }

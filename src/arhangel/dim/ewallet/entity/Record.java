@@ -60,8 +60,8 @@ public class Record {
         return "Record{" +
                 "description='" + description + '\'' +
                 ", sum=" + sum +
-                ", date=" + date +
                 ", isPut=" + isPut +
+                ", category=" + category +
                 '}';
     }
 }

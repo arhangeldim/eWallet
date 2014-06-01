@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS RECORDS
 (
     DESCR       TEXT                NOT NULL,
     AMOUNT      REAL                NOT NULL,
+    IS_PUT      INT                 NOT NULL,
     CATEGORY_ID INT                 NOT_NULL,
     ACCOUNT_ID  INT                 NOT NULL
 );

@@ -23,6 +23,7 @@ public class Controller {
 
     public Controller() {
         dataStore = new DbDataStore();
+        logger.debug("categories: {}",dataStore.getCategories());
     }
 
     private boolean isUserRegistered(String userName) {
@@ -50,6 +51,7 @@ public class Controller {
         if (isUserRegistered(name)) {
             User user = getUserByName(name);
             if (isPasswordCorrect(user, pass)) {
+                setCurrentUser(user);
                 return user;
             }
         }
@@ -80,6 +82,7 @@ public class Controller {
         if (!isUserRegistered(userName)) {
             User user = new User(userName, pass);
             dataStore.addUser(user);
+            setCurrentUser(user);
             return user;
         }
         return null;
