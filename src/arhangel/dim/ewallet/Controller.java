@@ -8,6 +8,7 @@ import arhangel.dim.ewallet.gui.Category;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.Set;
 
 /**
@@ -24,6 +25,19 @@ public class Controller {
     public Controller() {
         dataStore = new DbDataStore();
         logger.debug("categories: {}",dataStore.getCategories());
+    }
+
+    public String getSummary(Account account, Period period) {
+        Set<Record> records = dataStore.getRecords(account);
+        BigDecimal sum = new BigDecimal(0);
+        for (Record record : records) {
+            if (record.isPut()) {
+                sum = sum.add(record.getSum());
+            } else {
+                sum = sum.subtract(record.getSum());
+            }
+        }
+        return sum.toString();
     }
 
     private boolean isUserRegistered(String userName) {

@@ -34,7 +34,7 @@ public class RecordCellRenderer implements ListCellRenderer<Record> {
     @Override
     public Component getListCellRendererComponent(JList<? extends Record> list, Record value, int index, boolean isSelected, boolean cellHasFocus) {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+        panel.setBorder(BorderFactory.createLineBorder(Color.black));
         if (isSelected) {
             //panel.setBackground(Color.BLUE);
         }
