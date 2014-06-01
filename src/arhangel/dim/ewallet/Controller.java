@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -24,7 +26,7 @@ public class Controller {
 
     public Controller() {
         dataStore = new DbDataStore();
-        logger.debug("categories: {}",dataStore.getCategories());
+        logger.debug("categories: {}", dataStore.getCategories());
     }
 
     public String getSummary(Account account, Period period) {
@@ -38,6 +40,22 @@ public class Controller {
             }
         }
         return sum.toString();
+    }
+
+    public Map<Category, BigDecimal> getSumByCategories(Account account) {
+        Map<Category, BigDecimal> result = new HashMap<>();
+        Set<Record> records = dataStore.getRecords(account);
+        for (Record rec : records) {
+            if (result.containsKey(rec.getCategory())) {
+                BigDecimal tmp = result.get(rec.getCategory());
+                result.put(rec.getCategory(), tmp.add(rec.getSum()));
+
+            } else {
+                result.put(rec.getCategory(), rec.getSum());
+            }
+        }
+        return result;
+
     }
 
     private boolean isUserRegistered(String userName) {

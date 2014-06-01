@@ -3,6 +3,7 @@ package arhangel.dim.ewallet.gui;
 import arhangel.dim.ewallet.Controller;
 import arhangel.dim.ewallet.entity.Account;
 import arhangel.dim.ewallet.entity.Record;
+import arhangel.dim.ewallet.plot.PieChartPanel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,6 +16,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -40,7 +43,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     public GeneralFrame(Controller controller) {
         super("eWallet");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(new Dimension(600, 400));
+        setSize(new Dimension(800, 600));
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (int) ((dimension.getWidth() - getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - getHeight()) / 2);
@@ -88,19 +91,36 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         JPanel headerPanel = createHeader(selectedAcc);
 
 
+        /* Chart */
+        PieChartPanel chart = new PieChartPanel<>();
+        Map<Category, BigDecimal> values = controller.getSumByCategories(selectedAcc);
+        BigDecimal[] chartData = new BigDecimal[values.size()];
+        int i = 0;
+        for (BigDecimal bd : values.values()) {
+            chartData[i] = bd;
+            i++;
+        }
+        chart.setValues(chartData);
+        chart.setBackground(Color.BLUE);
+        chart.repaint();
+        chart.setMinimumSize(new Dimension(200, 200));
+        chart.setPreferredSize(new Dimension(200, 200));
+
+
         /* Layout management */
 
         Insets insets5 = new Insets(5, 5, 5, 5);
         setLayout(new GridBagLayout());
         add(headerPanel, new GridBagConstraints(0, 0, 3, 1, 0, 0,
-                GridBagConstraints.NORTH, GridBagConstraints.BOTH, insets5, 0, 0));
+                GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, insets5, 0, 0));
         add(accountBox, new GridBagConstraints(0, 1, 1, 1, 0, 0,
                 GridBagConstraints.WEST, GridBagConstraints.BOTH, insets5, 0, 0));
         add(recordScrollPane, new GridBagConstraints(0, 2, 1, 3, 0, 0,
                 GridBagConstraints.WEST, GridBagConstraints.BOTH, insets5, 0, 0));
         add(addRecordButton, new GridBagConstraints(1, 2, 1, 1, 0, 0,
                 GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets5, 0, 0));
-
+        add(chart, new GridBagConstraints(2, 2, 1, 1, 1, 1,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE, insets5, 0, 0));
 
         setJMenuBar(createMenu());
 
@@ -137,7 +157,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
 
         header.setLayout(new GridBagLayout());
         header.add(logoLabel, new GridBagConstraints(0, 0, 1, 3, 0, 0,
-                GridBagConstraints.NORTH, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
+                GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
         header.add(usernameLabel, new GridBagConstraints(1, 1, 1, 1, 0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
         header.add(summaryLabel, new GridBagConstraints(1, 2, 1, 1, 0, 0,
