@@ -11,35 +11,42 @@ import java.awt.event.ActionListener;
 /**
  *
  */
-public class LoginPanel extends JPanel implements ActionListener {
+public class LoginFrame extends JFrame implements ActionListener {
 
     private JButton loginButton;
     private JButton regButton;
     private JTextField loginField;
     private JPasswordField passField;
-    private JTextArea infoArea;
+    private JLabel infoLabel;
 
     private Controller controller;
-    private JFrame parent;
 
     private static final String CMD_LOGIN = "cmd_login";
     private static final String CMD_REG = "cmd_reg";
 
-    public LoginPanel(JFrame parent, Controller controller) {
-        this.controller = controller;
-        this.parent = parent;
+    public LoginFrame(Controller controller) {
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setSize(new Dimension(300, 200));
+        setTitle("eWallet");
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (int) ((dimension.getWidth() - getWidth()) / 2);
+        int y = (int) ((dimension.getHeight() - getHeight()) / 2);
+        setLocation(x, y);
 
         setLayout(new BorderLayout());
-        setSize(new Dimension(300, 200));
+        this.controller = controller;
 
         JPanel fieldPane = new JPanel();
         JPanel buttonPane = new JPanel();
+        buttonPane.setPreferredSize(new Dimension(300, 50));
 
         loginButton = new JButton("Login");
+        loginButton.setSize(new Dimension(70, 20));
         regButton = new JButton("Register");
+        regButton.setSize(new Dimension(70, 20));
         loginField = new JTextField(10);
         passField = new JPasswordField(10);
-        infoArea = new JTextArea();
+        infoLabel = new JLabel("Type user/password");
 
         loginButton.addActionListener(this);
         loginButton.setActionCommand(CMD_LOGIN);
@@ -52,10 +59,10 @@ public class LoginPanel extends JPanel implements ActionListener {
         fieldPane.setLayout(new BoxLayout(fieldPane, BoxLayout.Y_AXIS));
         fieldPane.add(loginField);
         fieldPane.add(passField);
+        fieldPane.add(infoLabel);
 
-        add(fieldPane, BorderLayout.NORTH);
-        add(buttonPane, BorderLayout.CENTER);
-        add(infoArea, BorderLayout.SOUTH);
+        add(fieldPane, BorderLayout.CENTER);
+        add(buttonPane, BorderLayout.SOUTH);
     }
 
     @Override
@@ -65,13 +72,13 @@ public class LoginPanel extends JPanel implements ActionListener {
         String name = loginField.getText();
 
         if (pass.trim().isEmpty() || name.trim().isEmpty()) {
-            infoArea.setText("Empty login/pass");
+            infoLabel.setText("Empty login/pass");
             return;
         }
         if (CMD_LOGIN.equals(cmd)) {
             User user = controller.login(name, pass);
             if (user == null) {
-                infoArea.setText("Invalid user/password.");
+                infoLabel.setText("Invalid user/password.");
             } else {
                 showAccounts(user);
             }
@@ -79,7 +86,7 @@ public class LoginPanel extends JPanel implements ActionListener {
             System.out.println("Register");
             User user = controller.registerNewUser(name, pass);
             if (user == null) {
-                infoArea.setText("User: " + name + " already exist");
+                infoLabel.setText("User: " + name + " already exist");
             } else {
                 showAccounts(user);
             }
@@ -94,7 +101,6 @@ public class LoginPanel extends JPanel implements ActionListener {
         setVisible(false);
         JFrame general = new GeneralFrame(controller);
         general.setVisible(true);
-        parent.setVisible(false);
 
     }
 }

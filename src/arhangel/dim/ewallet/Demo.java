@@ -1,6 +1,6 @@
 package arhangel.dim.ewallet;
 
-import arhangel.dim.ewallet.gui.LoginPanel;
+import arhangel.dim.ewallet.gui.LoginFrame;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,17 +20,8 @@ public class Demo {
 
     private static void createAndShowGUI() {
 
-        JFrame frame = new JFrame("ButtonDemo");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Controller controller = new Controller();
-        LoginPanel loginPanel = new LoginPanel(frame, controller);
-        loginPanel.setOpaque(true);
-
-        frame.setSize(new Dimension(400, 300));
-        frame.setLayout(new BorderLayout());
-        frame.getContentPane().add(loginPanel, BorderLayout.WEST);
-
-        //frame.pack();
+        JFrame frame = new LoginFrame(controller);
         frame.setVisible(true);
     }
 }
