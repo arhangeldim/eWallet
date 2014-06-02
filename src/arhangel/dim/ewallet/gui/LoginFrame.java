@@ -38,11 +38,14 @@ public class LoginFrame extends JFrame implements ActionListener {
         JPanel buttonPane = new JPanel();
         buttonPane.setPreferredSize(new Dimension(300, 50));
 
+        Font tinyFont = new Font("Arial", Font.PLAIN, 24);
+
         JButton loginButton = new JButton("Login");
         loginButton.setSize(new Dimension(70, 20));
         JButton regButton = new JButton("Register");
         regButton.setSize(new Dimension(70, 20));
         loginField = new JTextField(10);
+        loginField.setFont(tinyFont);
         passField = new JPasswordField(10);
         infoLabel = new JLabel("Type user/password");
 

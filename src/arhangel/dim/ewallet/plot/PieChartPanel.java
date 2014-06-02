@@ -12,7 +12,7 @@ public class PieChartPanel<X, Y> extends JPanel {
     private PlotModel<X, Y> model;
 
     private BigDecimal[] values;
-    private Color[] colors = {Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW};
+    private Color[] colors = {Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.DARK_GRAY, Color.CYAN, Color.GREEN, Color.YELLOW};
 
     public PieChartPanel() {
         super();
@@ -23,7 +23,15 @@ public class PieChartPanel<X, Y> extends JPanel {
         this.values = values;
     }
 
+    public void setColors(Color[] colors) {
+        this.colors = colors;
+    }
+
     void drawPie(Graphics2D g, Rectangle area) {
+        RenderingHints rh = new RenderingHints(
+                RenderingHints.KEY_ANTIALIASING,
+                RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHints(rh);
         BigDecimal total = new BigDecimal(0);
         for (int i = 0; i < values.length; i++) {
             total = total.add(values[i]);
@@ -43,6 +51,7 @@ public class PieChartPanel<X, Y> extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
+
         drawPie((Graphics2D) g, new Rectangle(0, 0, 200, 200));
     }
 

@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -38,11 +37,15 @@ public class RecordCellRenderer implements ListCellRenderer<Record> {
         if (isSelected) {
             //panel.setBackground(Color.BLUE);
         }
+
+        Font tinyFont = new Font("Arial", Font.PLAIN, 12);
         if (value != null) {
             ImageIcon icon = (value.isPut()) ? putIcon : callIcon;
+            JLabel descrLabel = new JLabel(value.getDescription());
+            descrLabel.setFont(tinyFont);
             panel.add(new JLabel(icon), BorderLayout.WEST);
-            panel.add(new JLabel(value.getSum().toString() + " rub"), BorderLayout.CENTER);
-            panel.add(new JLabel(value.getCategory().getName()), BorderLayout.SOUTH);
+            panel.add(new JLabel(value.getSum().toString() + " rub, " + value.getCategory().getName()), BorderLayout.CENTER);
+            panel.add(descrLabel, BorderLayout.SOUTH);
         }
 
         return panel;

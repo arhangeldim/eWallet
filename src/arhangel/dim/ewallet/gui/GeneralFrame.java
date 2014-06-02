@@ -90,10 +90,10 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         // NOTE: account should be selected
         JPanel headerPanel = createHeader(selectedAcc);
 
-
         /* Chart */
         PieChartPanel chart = new PieChartPanel<>();
         Map<Category, BigDecimal> values = controller.getSumByCategories(selectedAcc);
+        logger.info("Category values: {}", values);
         BigDecimal[] chartData = new BigDecimal[values.size()];
         int i = 0;
         for (BigDecimal bd : values.values()) {
@@ -101,7 +101,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
             i++;
         }
         chart.setValues(chartData);
-        chart.setBackground(Color.BLUE);
+        //chart.setBackground(Color.BLUE);
         chart.repaint();
         chart.setMinimumSize(new Dimension(200, 200));
         chart.setPreferredSize(new Dimension(200, 200));
@@ -117,9 +117,9 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
                 GridBagConstraints.WEST, GridBagConstraints.BOTH, insets5, 0, 0));
         add(recordScrollPane, new GridBagConstraints(0, 2, 1, 3, 0, 0,
                 GridBagConstraints.WEST, GridBagConstraints.BOTH, insets5, 0, 0));
-        add(addRecordButton, new GridBagConstraints(1, 2, 1, 1, 0, 0,
-                GridBagConstraints.WEST, GridBagConstraints.HORIZONTAL, insets5, 0, 0));
-        add(chart, new GridBagConstraints(2, 2, 1, 1, 1, 1,
+        add(addRecordButton, new GridBagConstraints(1, 1, 1, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE, insets5, 0, 0));
+        add(chart, new GridBagConstraints(1, 2, 1, 1, 0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE, insets5, 0, 0));
 
         setJMenuBar(createMenu());
@@ -129,19 +129,27 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
 
     }
 
+    private void updateSummary() {
+        BigDecimal sum = controller.getSummary(controller.getCurrentAccount(), null);
+        summaryLabel.setText(sum + " rub");
+        Font font = new Font("Arial", Font.BOLD, 24);
+        summaryLabel.setFont(font);
+        if (sum.signum() > 0) {
+            summaryLabel.setForeground(Color.GREEN);
+        } else {
+            summaryLabel.setForeground(Color.RED);
+        }
+    }
+
     private JPanel createHeader(Account account) {
         JPanel header = new JPanel();
         header.setBorder(BorderFactory.createLineBorder(Color.black));
-        Font font = new Font("Arial", Font.BOLD, 18);
+        Font font = new Font("Arial", Font.BOLD, 24);
 
-        String summary = "";
+        summaryLabel = new JLabel();
         if (account != null) {
-            summary = controller.getSummary(controller.getCurrentAccount(), null) + " rub";
-
+            updateSummary();
         }
-        summaryLabel = new JLabel(summary);
-        summaryLabel.setFont(font);
-        summaryLabel.setForeground(Color.GREEN);
 
         usernameLabel = new JLabel(controller.getCurrentUser().getName());
         usernameLabel.setFont(font);
@@ -156,12 +164,12 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         }
 
         header.setLayout(new GridBagLayout());
-        header.add(logoLabel, new GridBagConstraints(0, 0, 1, 3, 0, 0,
-                GridBagConstraints.LINE_START, GridBagConstraints.NONE, new Insets(0, 0, 0, 0), 0, 0));
-        header.add(usernameLabel, new GridBagConstraints(1, 1, 1, 1, 0, 0,
+        header.add(logoLabel, new GridBagConstraints(0, 0, 1, 3, 0, 3,
+                GridBagConstraints.LINE_START, GridBagConstraints.HORIZONTAL, new Insets(0, 0, 0, 0), 0, 0));
+        header.add(usernameLabel, new GridBagConstraints(1, 1, 1, 1, 1, 2,
                 GridBagConstraints.CENTER, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
-        header.add(summaryLabel, new GridBagConstraints(1, 2, 1, 1, 0, 0,
-                GridBagConstraints.NORTH, GridBagConstraints.HORIZONTAL, new Insets(5, 5, 5, 5), 0, 0));
+        header.add(summaryLabel, new GridBagConstraints(1, 2, 1, 1, 1, 2,
+                GridBagConstraints.NORTH, GridBagConstraints.BOTH, new Insets(5, 5, 5, 5), 0, 0));
 
         return header;
     }
@@ -206,7 +214,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
                 dialog.setModal(true);
                 dialog.setVisible(true);
                 showRecords(controller.getCurrentAccount());
-                summaryLabel.setText(controller.getSummary(controller.getCurrentAccount(), null) + " rub");
+                updateSummary();
                 break;
             case CMD_EDIT_ACCOUNT:
             case CMD_DELETE_ACCOUNT:

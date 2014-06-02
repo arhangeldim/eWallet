@@ -29,7 +29,7 @@ public class Controller {
         logger.debug("categories: {}", dataStore.getCategories());
     }
 
-    public String getSummary(Account account, Period period) {
+    public BigDecimal getSummary(Account account, Period period) {
         Set<Record> records = dataStore.getRecords(account);
         BigDecimal sum = new BigDecimal(0);
         for (Record record : records) {
@@ -39,7 +39,7 @@ public class Controller {
                 sum = sum.subtract(record.getSum());
             }
         }
-        return sum.toString();
+        return sum;
     }
 
     public Map<Category, BigDecimal> getSumByCategories(Account account) {

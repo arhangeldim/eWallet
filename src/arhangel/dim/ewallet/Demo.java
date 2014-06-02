@@ -3,7 +3,6 @@ package arhangel.dim.ewallet;
 import arhangel.dim.ewallet.gui.LoginFrame;
 
 import javax.swing.*;
-import java.awt.*;
 
 /**
  *
