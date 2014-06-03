@@ -1,11 +1,19 @@
 package arhangel.dim.ewallet.gui;
 
+import java.awt.*;
+
 /**
  *
  */
 public class Category {
     private int id;
     private String name;
+    private int colorId;
+    private static Color[] colors = {Color.BLUE, Color.RED, Color.GREEN, Color.YELLOW, Color.DARK_GRAY, Color.CYAN, Color.PINK, Color.MAGENTA};
+    private static int counter = 0;
+    public Category() {
+        colorId = counter++;
+    }
 
     public String getName() {
         return name;
@@ -21,6 +29,18 @@ public class Category {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public int getColorId() {
+        return colorId;
+    }
+
+    public void setColorId(int colorId) {
+        this.colorId = colorId;
+    }
+
+    public Color getColor() {
+        return colors[colorId % colors.length];
     }
 
     @Override

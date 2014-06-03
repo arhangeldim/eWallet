@@ -3,7 +3,9 @@ package arhangel.dim.ewallet.gui;
 import arhangel.dim.ewallet.Controller;
 import arhangel.dim.ewallet.entity.Account;
 import arhangel.dim.ewallet.entity.Record;
+import arhangel.dim.ewallet.plot.CategoryPlotModel;
 import arhangel.dim.ewallet.plot.PieChartPanel;
+import arhangel.dim.ewallet.plot.PlotModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     private static final String CMD_DELETE_ACCOUNT = "cmd_delete_account";
     private static final String CMD_EDIT_ACCOUNT = "cmd_edit_account";
     private static final String CMD_ADD_RECORD = "cmd_add_record";
+    private static final String CMD_EXIT = "cmd_exit";
 
     private Controller controller;
     private JList<Record> recordsList;
@@ -39,18 +42,17 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
     private JLabel summaryLabel;
     private JLabel usernameLabel;
     private DefaultListModel<Record> recordsListModel;
+    private PieChartPanel chartPanel;
 
     public GeneralFrame(Controller controller) {
         super("eWallet");
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setSize(new Dimension(800, 600));
+        setSize(new Dimension(900, 600));
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         int x = (int) ((dimension.getWidth() - getWidth()) / 2);
         int y = (int) ((dimension.getHeight() - getHeight()) / 2);
         setLocation(x, y);
         this.controller = controller;
-
-
 
         /* Init account selector */
         DefaultComboBoxModel<Account> boxModel = new DefaultComboBoxModel<>();
@@ -91,24 +93,10 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         JPanel headerPanel = createHeader(selectedAcc);
 
         /* Chart */
-        PieChartPanel chart = new PieChartPanel<>();
-        Map<Category, BigDecimal> values = controller.getSumByCategories(selectedAcc);
-        logger.info("Category values: {}", values);
-        BigDecimal[] chartData = new BigDecimal[values.size()];
-        int i = 0;
-        for (BigDecimal bd : values.values()) {
-            chartData[i] = bd;
-            i++;
-        }
-        chart.setValues(chartData);
-        //chart.setBackground(Color.BLUE);
-        chart.repaint();
-        chart.setMinimumSize(new Dimension(200, 200));
-        chart.setPreferredSize(new Dimension(200, 200));
+        chartPanel = new PieChartPanel();
 
 
         /* Layout management */
-
         Insets insets5 = new Insets(5, 5, 5, 5);
         setLayout(new GridBagLayout());
         add(headerPanel, new GridBagConstraints(0, 0, 3, 1, 0, 0,
@@ -119,8 +107,7 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
                 GridBagConstraints.WEST, GridBagConstraints.BOTH, insets5, 0, 0));
         add(addRecordButton, new GridBagConstraints(1, 1, 1, 1, 0, 0,
                 GridBagConstraints.CENTER, GridBagConstraints.NONE, insets5, 0, 0));
-        add(chart, new GridBagConstraints(1, 2, 1, 1, 0, 0,
-                GridBagConstraints.CENTER, GridBagConstraints.NONE, insets5, 0, 0));
+        updateChart(selectedAcc);
 
         setJMenuBar(createMenu());
 
@@ -139,6 +126,18 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         } else {
             summaryLabel.setForeground(Color.RED);
         }
+    }
+
+    private void updateChart(Account account) {
+        Map<Category, BigDecimal> values = controller.getSumByCategories(account);
+        PlotModel plotModel = new CategoryPlotModel(values);
+        chartPanel.setModel(plotModel);
+        logger.info("Category values: {}", values);
+        chartPanel.repaint();
+        chartPanel.setMinimumSize(new Dimension(200, 200));
+        chartPanel.setPreferredSize(new Dimension(200, 200));
+        add(chartPanel, new GridBagConstraints(1, 2, 1, 1, 0, 0,
+                GridBagConstraints.CENTER, GridBagConstraints.NONE, new Insets(5, 5, 5, 5), 0, 0));
     }
 
     private JPanel createHeader(Account account) {
@@ -193,6 +192,11 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
         deleteAccount.addActionListener(this);
         accountMenu.add(deleteAccount);
 
+        JMenuItem exit = new JMenuItem("Exit");
+        exit.setActionCommand(CMD_EXIT);
+        exit.addActionListener(this);
+        accountMenu.add(exit);
+
         menuBar.add(accountMenu);
         return menuBar;
     }
@@ -215,7 +219,12 @@ public class GeneralFrame extends JFrame implements ActionListener, ListSelectio
                 dialog.setVisible(true);
                 showRecords(controller.getCurrentAccount());
                 updateSummary();
+                updateChart(controller.getCurrentAccount());
                 break;
+            case CMD_EXIT:
+                logger.info("Exit");
+                setVisible(false);
+                System.exit(0);
             case CMD_EDIT_ACCOUNT:
             case CMD_DELETE_ACCOUNT:
             case CMD_ADD_ACCOUNT:

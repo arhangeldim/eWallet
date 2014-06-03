@@ -42,9 +42,11 @@ public class RecordCellRenderer implements ListCellRenderer<Record> {
         if (value != null) {
             ImageIcon icon = (value.isPut()) ? putIcon : callIcon;
             JLabel descrLabel = new JLabel(value.getDescription());
+            JLabel categoryLabel = new JLabel(value.getSum().toString() + " rub, " + value.getCategory().getName());
+            categoryLabel.setForeground(value.getCategory().getColor());
             descrLabel.setFont(tinyFont);
             panel.add(new JLabel(icon), BorderLayout.WEST);
-            panel.add(new JLabel(value.getSum().toString() + " rub, " + value.getCategory().getName()), BorderLayout.CENTER);
+            panel.add(categoryLabel, BorderLayout.CENTER);
             panel.add(descrLabel, BorderLayout.SOUTH);
         }
 
