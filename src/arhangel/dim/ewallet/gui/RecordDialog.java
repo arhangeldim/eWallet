@@ -31,10 +31,15 @@ public class RecordDialog extends JDialog implements ActionListener {
     public RecordDialog(Controller controller) {
         super();
         this.controller = controller;
-
         GridBagLayout layout = new GridBagLayout();
         setLayout(layout);
         setSize(300, 400);
+
+        Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+        int x = (int) ((dimension.getWidth() - getWidth()) / 2);
+        int y = (int) ((dimension.getHeight() - getHeight()) / 2);
+        setLocation(x, y);
+
             /* Create radio button group */
         JRadioButton putButton = new JRadioButton("Put");
         JRadioButton callButton = new JRadioButton("Call");
