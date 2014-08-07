@@ -15,8 +15,16 @@ public class DbHelper {
 
     private static Logger logger = LoggerFactory.getLogger(DbHelper.class);
     private Connection conn;
+    private static DbHelper instance;
 
-    public DbHelper() {
+    public static DbHelper getInstance() {
+        if (instance == null) {
+            instance = new DbHelper();
+        }
+        return instance;
+    }
+
+    private DbHelper() {
         try {
             Class.forName("org.sqlite.JDBC");
             String databaseUrl = "jdbc:sqlite:test.db";
@@ -61,4 +69,13 @@ public class DbHelper {
         return new String(java.nio.file.Files.readAllBytes(resPath), "UTF8");
     }
 
+    static void closeResource(AutoCloseable res) {
+        try {
+            if (res != null) {
+                res.close();
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to close resource: {}", res);
+        }
+    }
 }
